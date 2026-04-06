@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CrazyBurger — Burger Terlezat di Kota!</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { display: ['Syne','sans-serif'], body: ['Inter','sans-serif'] },
+          colors: { brand: '#E63946', gold: '#FFBA08', dark: '#1A0A00' }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #FFF8F0; }
+    h1,h2,h3,.font-display { font-family: 'Syne', sans-serif; }
+
+    /* Navbar */
+    #navbar { transition: background 0.3s, box-shadow 0.3s; }
+    #navbar.scrolled { background: rgba(26,10,0,0.97) !important; box-shadow: 0 4px 30px rgba(0,0,0,0.3); }
+
+    /* Noise texture overlay */
+    .noise::before {
+      content:''; position:absolute; inset:0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events:none; z-index:1;
+    }
+
+    /* Hero gradient */
+    .hero-bg { background: linear-gradient(135deg, #1A0A00 0%, #3E1200 50%, #6B1A00 100%); }
+
+    /* Card */
+    .menu-card { transition: transform 0.35s cubic-bezier(.22,.68,0,1.2), box-shadow 0.35s; }
+    .menu-card:hover { transform: translateY(-10px) scale(1.02); box-shadow: 0 24px 48px rgba(230,57,70,0.18); }
+    .menu-card:hover .card-img { transform: scale(1.1); }
+    .card-img { transition: transform 0.5s ease; }
+
+    /* Marquee */
+    @keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+    .marquee-track { animation: marquee 18s linear infinite; display:flex; width:max-content; }
+
+    /* Blob */
+    .blob { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+
+    /* Input focus */
+    .form-field:focus { outline:none; border-color:#E63946; box-shadow: 0 0 0 3px rgba(230,57,70,0.15); }
+
+    /* Spin loader */
+    @keyframes spin { to{transform:rotate(360deg)} }
+    .spin { animation: spin 0.8s linear infinite; }
+  </style>
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<nav id="navbar" class="fixed top-0 left-0 right-0 z-50 bg-dark py-4">
+  <div class="max-w-6xl mx-auto px-6 flex items-center justify-between">
+    <a href="#home" class="flex items-center gap-2.5">
+      <div class="w-9 h-9 bg-brand rounded-xl flex items-center justify-center">
+        <i class="fa-solid fa-burger text-white text-sm"></i>
+      </div>
+      <span class="font-display text-white text-xl font-bold">Crazy<span class="text-gold">Burger</span></span>
+    </a>
+
+    <ul class="hidden md:flex items-center gap-8 text-sm font-medium text-white/70">
+      <li><a href="#home"    class="hover:text-gold transition-colors">Home</a></li>
+      <li><a href="#menu"    class="hover:text-gold transition-colors">Menu</a></li>
+      <li><a href="#about"   class="hover:text-gold transition-colors">About</a></li>
+      <li><a href="#contact" class="hover:text-gold transition-colors">Contact</a></li>
+    </ul>
+
+    <div class="flex items-center gap-3">
+      <a href="https://wa.me/6281243599124?text=Halo%20CrazyBurger%2C%20saya%20mau%20pesan!"
+         target="_blank" rel="noopener"
+         class="hidden sm:inline-flex items-center gap-2 bg-gold hover:bg-yellow-300 text-dark font-bold text-sm px-5 py-2.5 rounded-full transition-all hover:scale-105">
+        <i class="fa-brands fa-whatsapp"></i> Pesan
+      </a>
+      <button id="menuBtn" class="md:hidden text-white text-xl p-1">
+        <i id="menuIcon" class="fa-solid fa-bars"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile -->
+  <div id="mobileMenu" class="hidden md:hidden bg-dark border-t border-white/10 px-6 py-5 flex flex-col gap-3 text-sm font-medium text-white/80">
+    <a href="#home"    class="mobile-link py-2 border-b border-white/10 hover:text-gold transition-colors">Home</a>
+    <a href="#menu"    class="mobile-link py-2 border-b border-white/10 hover:text-gold transition-colors">Menu</a>
+    <a href="#about"   class="mobile-link py-2 border-b border-white/10 hover:text-gold transition-colors">About</a>
+    <a href="#contact" class="mobile-link py-2 hover:text-gold transition-colors">Contact</a>
+    <a href="https://wa.me/6281243599124?text=Halo%20CrazyBurger%2C%20saya%20mau%20pesan!"
+       target="_blank" rel="noopener"
+       class="mt-2 flex items-center justify-center gap-2 bg-gold text-dark font-bold px-4 py-3 rounded-full">
+      <i class="fa-brands fa-whatsapp"></i> Pesan via WhatsApp
+    </a>
+  </div>
+</nav>
+
+<!-- ===== HERO ===== -->
+<section id="home" class="hero-bg noise relative min-h-screen flex items-center overflow-hidden pt-20">
+  <!-- Decorative blobs -->
+  <div class="absolute top-20 right-0 w-96 h-96 bg-brand/20 blob blur-3xl pointer-events-none"></div>
+  <div class="absolute bottom-0 left-0 w-72 h-72 bg-gold/10 blob blur-3xl pointer-events-none"></div>
+
+  <div class="relative z-10 max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center py-16">
+    <!-- Left -->
+    <div>
+      <div id="statusBadge" class="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-gold text-xs font-bold tracking-widest uppercase px-4 py-2 rounded-full mb-8 backdrop-blur-sm">
+        <span id="statusDot" class="w-2 h-2 rounded-full animate-pulse"></span>
+        <span id="statusText">BUKA SEKARANG · DELIVERY 30 MENIT</span>
+      </div>
+      <h1 class="font-display text-5xl sm:text-6xl lg:text-7xl text-white font-extrabold leading-[1.05] mb-6">
+        Burger<br /><span class="text-gold">Terlezat</span><br />di Kota!
+      </h1>
+      <p class="text-white/60 text-lg leading-relaxed mb-10 max-w-md">
+        Dibuat dari daging sapi segar lokal, dipanggang sempurna, dengan saus rahasia yang bikin ketagihan.
+      </p>
+      <div class="flex flex-wrap gap-4">
+        <a href="#menu"
+           class="inline-flex items-center gap-2 bg-brand hover:bg-red-500 text-white font-bold px-7 py-4 rounded-2xl transition-all hover:scale-105 shadow-lg shadow-brand/30">
+          <i class="fa-solid fa-utensils"></i> Lihat Menu
+        </a>
+        <a href="#contact" id="heroOrderBtn"
+           class="inline-flex items-center gap-2 bg-gold hover:bg-yellow-300 text-dark font-bold px-7 py-4 rounded-2xl transition-all hover:scale-105 shadow-lg shadow-gold/20">
+          Pesan Sekarang
+        </a>
+      </div>
+
+      <!-- Stats -->
+      <div class="flex gap-8 mt-12 pt-8 border-t border-white/10">
+        <div>
+          <p class="font-display text-3xl text-gold font-bold">50+</p>
+          <p class="text-white/50 text-xs mt-0.5">Menu Pilihan</p>
+        </div>
+        <div>
+          <p class="font-display text-3xl text-gold font-bold">10K+</p>
+          <p class="text-white/50 text-xs mt-0.5">Pelanggan Puas</p>
+        </div>
+        <div>
+          <p class="font-display text-3xl text-gold font-bold">4.9★</p>
+          <p class="text-white/50 text-xs mt-0.5">Rating</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Hero image -->
+    <div class="relative flex justify-center">
+      <div class="relative w-72 h-72 sm:w-96 sm:h-96">
+        <div class="absolute inset-0 bg-brand/30 rounded-full blur-3xl"></div>
+        <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=700&auto=format&fit=crop&q=85"
+             alt="CrazyBurger"
+             class="relative z-10 w-full h-full object-cover rounded-[2.5rem] shadow-2xl border-4 border-white/10" />
+        <!-- Floating badge -->
+        <div class="absolute -top-4 -right-4 z-20 bg-gold text-dark font-display font-bold text-sm px-4 py-2 rounded-2xl shadow-lg rotate-6">
+          🔥 Hot Pick
+        </div>
+        <div class="absolute -bottom-4 -left-4 z-20 bg-dark border border-white/20 text-white text-xs font-semibold px-4 py-2.5 rounded-2xl shadow-lg backdrop-blur-sm">
+          <i class="fa-solid fa-star text-gold mr-1"></i>4.9 · 2.3K Reviews
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== MARQUEE ===== -->
+<div class="bg-brand py-4 overflow-hidden">
+  <div class="marquee-track text-white font-display font-bold text-sm gap-0">
+    <span class="px-8">🍔 CLASSIC CRAZY</span><span class="px-8">·</span>
+    <span class="px-8">🌶️ DOUBLE SMASH</span><span class="px-8">·</span>
+    <span class="px-8">🍄 MUSHROOM SWISS</span><span class="px-8">·</span>
+    <span class="px-8">👑 CRAZY TOWER</span><span class="px-8">·</span>
+    <span class="px-8">🍟 CRISPY FRIES</span><span class="px-8">·</span>
+    <span class="px-8">🥤 MILKSHAKE</span><span class="px-8">·</span>
+    <!-- duplicate for seamless loop -->
+    <span class="px-8">🍔 CLASSIC CRAZY</span><span class="px-8">·</span>
+    <span class="px-8">🌶️ DOUBLE SMASH</span><span class="px-8">·</span>
+    <span class="px-8">🍄 MUSHROOM SWISS</span><span class="px-8">·</span>
+    <span class="px-8">👑 CRAZY TOWER</span><span class="px-8">·</span>
+    <span class="px-8">🍟 CRISPY FRIES</span><span class="px-8">·</span>
+    <span class="px-8">🥤 MILKSHAKE</span><span class="px-8">·</span>
+  </div>
+</div>
+
+<!-- ===== MENU ===== -->
+<section id="menu" class="py-24 bg-[#FFF8F0]">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-14">
+      <div>
+        <span class="inline-block bg-red-100 text-brand text-xs font-bold tracking-widest uppercase px-4 py-1.5 rounded-full mb-3">Menu Kami</span>
+        <h2 class="font-display text-4xl sm:text-5xl font-extrabold text-dark">Pilihan <span class="text-brand">Burger</span><br />Favorit</h2>
+      </div>
+      <p class="text-gray-500 text-sm max-w-xs">Fresh to order · Tanpa pengawet · Bahan lokal pilihan</p>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+      <!-- Card 1 -->
+      <div class="menu-card bg-white rounded-3xl overflow-hidden shadow-sm border border-amber-100/80">
+        <div class="overflow-hidden h-52 relative">
+          <img src="https://images.unsplash.com/photo-1550547660-d9450f859349?w=600&auto=format&fit=crop&q=80"
+               alt="Classic Crazy" class="card-img w-full h-full object-cover" loading="lazy" />
+          <span class="absolute top-3 left-3 bg-gold text-dark text-xs font-bold px-3 py-1 rounded-full">Bestseller</span>
+        </div>
+        <div class="p-5">
+          <h3 class="font-display font-bold text-lg text-dark">Classic Crazy</h3>
+          <p class="text-gray-500 text-sm mt-1 leading-relaxed">Beef patty juicy, selada, tomat, keju cheddar, saus spesial.</p>
+          <div class="flex items-center justify-between mt-4">
+            <span class="font-display text-brand font-bold text-xl">Rp 35.000</span>
+            <a href="https://wa.me/6281243599124?text=Pesan%20Classic%20Crazy%201%20pcs"
+               target="_blank" rel="noopener"
+               class="bg-dark hover:bg-brand text-white text-xs font-bold px-4 py-2 rounded-full transition-all hover:scale-105">
+              Pesan
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="menu-card bg-white rounded-3xl overflow-hidden shadow-sm border border-amber-100/80">
+        <div class="overflow-hidden h-52 relative">
+          <img src="https://images.unsplash.com/photo-1586190848861-99aa4a171e90?w=600&auto=format&fit=crop&q=80"
+               alt="Double Smash" class="card-img w-full h-full object-cover" loading="lazy" />
+          <span class="absolute top-3 left-3 bg-brand text-white text-xs font-bold px-3 py-1 rounded-full">Spicy 🌶️</span>
+        </div>
+        <div class="p-5">
+          <h3 class="font-display font-bold text-lg text-dark">Double Smash</h3>
+          <p class="text-gray-500 text-sm mt-1 leading-relaxed">Dua patty smashed, saus pedas level 3, bawang karamel, pickles.</p>
+          <div class="flex items-center justify-between mt-4">
+            <span class="font-display text-brand font-bold text-xl">Rp 52.000</span>
+            <a href="https://wa.me/6281243599124?text=Pesan%20Double%20Smash%201%20pcs"
+               target="_blank" rel="noopener"
+               class="bg-dark hover:bg-brand text-white text-xs font-bold px-4 py-2 rounded-full transition-all hover:scale-105">
+              Pesan
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="menu-card bg-white rounded-3xl overflow-hidden shadow-sm border border-amber-100/80">
+        <div class="overflow-hidden h-52 relative">
+          <img src="https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=600&auto=format&fit=crop&q=80"
+               alt="Mushroom Swiss" class="card-img w-full h-full object-cover" loading="lazy" />
+          <span class="absolute top-3 left-3 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">New 🆕</span>
+        </div>
+        <div class="p-5">
+          <h3 class="font-display font-bold text-lg text-dark">Mushroom Swiss</h3>
+          <p class="text-gray-500 text-sm mt-1 leading-relaxed">Beef patty, jamur sautéed, keju swiss meleleh, saus truffle.</p>
+          <div class="flex items-center justify-between mt-4">
+            <span class="font-display text-brand font-bold text-xl">Rp 48.000</span>
+            <a href="https://wa.me/6281243599124?text=Pesan%20Mushroom%20Swiss%201%20pcs"
+               target="_blank" rel="noopener"
+               class="bg-dark hover:bg-brand text-white text-xs font-bold px-4 py-2 rounded-full transition-all hover:scale-105">
+              Pesan
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 4 -->
+      <div class="menu-card bg-white rounded-3xl overflow-hidden shadow-sm border border-amber-100/80">
+        <div class="overflow-hidden h-52 relative">
+          <img src="https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=600&auto=format&fit=crop&q=80"
+               alt="Crazy Tower" class="card-img w-full h-full object-cover" loading="lazy" />
+          <span class="absolute top-3 left-3 bg-purple-600 text-white text-xs font-bold px-3 py-1 rounded-full">Premium 👑</span>
+        </div>
+        <div class="p-5">
+          <h3 class="font-display font-bold text-lg text-dark">Crazy Tower</h3>
+          <p class="text-gray-500 text-sm mt-1 leading-relaxed">Triple patty, bacon crispy, 3 lapis keju, onion ring, saus BBQ.</p>
+          <div class="flex items-center justify-between mt-4">
+            <span class="font-display text-brand font-bold text-xl">Rp 75.000</span>
+            <a href="https://wa.me/6281243599124?text=Pesan%20Crazy%20Tower%201%20pcs"
+               target="_blank" rel="noopener"
+               class="bg-dark hover:bg-brand text-white text-xs font-bold px-4 py-2 rounded-full transition-all hover:scale-105">
+              Pesan
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===== ABOUT ===== -->
+<section id="about" class="py-24 bg-dark relative overflow-hidden">
+  <div class="absolute inset-0 opacity-5" style="background-image:radial-gradient(circle, #fff 1px, transparent 1px);background-size:32px 32px;"></div>
+  <div class="absolute top-0 right-0 w-96 h-96 bg-brand/15 blob blur-3xl pointer-events-none"></div>
+
+  <div class="max-w-6xl mx-auto px-6 relative z-10">
+    <div class="grid md:grid-cols-2 gap-16 items-center">
+      <div class="relative">
+        <div class="rounded-[2rem] overflow-hidden shadow-2xl aspect-[4/3]">
+          <img src="https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=800&auto=format&fit=crop&q=80"
+               alt="CrazyBurger kitchen" class="w-full h-full object-cover" loading="lazy" />
+        </div>
+        <div class="absolute -bottom-5 -right-5 bg-gold text-dark font-display font-bold text-sm px-5 py-3 rounded-2xl shadow-xl -rotate-2">
+          Sejak 2018 🍔
+        </div>
+        <!-- Mini stats card -->
+        <div class="absolute -top-5 -left-5 bg-white/10 backdrop-blur-md border border-white/20 text-white px-5 py-4 rounded-2xl shadow-xl">
+          <p class="font-display text-2xl font-bold text-gold">10K+</p>
+          <p class="text-white/60 text-xs mt-0.5">Pelanggan Puas</p>
+        </div>
+      </div>
+
+      <div>
+        <span class="inline-block bg-white/10 text-gold text-xs font-bold tracking-widest uppercase px-4 py-1.5 rounded-full mb-5">Tentang Kami</span>
+        <h2 class="font-display text-4xl sm:text-5xl text-white font-extrabold leading-tight mb-6">
+          Bukan Sekadar<br /><span class="text-gold">Burger Biasa</span>
+        </h2>
+        <p class="text-white/60 leading-relaxed mb-4">
+          CrazyBurger lahir dari obsesi sederhana: membuat burger yang benar-benar luar biasa. Dimulai dari dapur kecil di 2018, kini kami telah melayani lebih dari 10.000 pelanggan setia.
+        </p>
+        <p class="text-white/60 leading-relaxed mb-8">
+          Setiap patty dibuat dari daging sapi segar lokal, dipanggang sempurna, dan disajikan dengan bahan premium tanpa pengawet.
+        </p>
+        <div class="grid grid-cols-3 gap-4">
+          <div class="bg-white/5 border border-white/10 rounded-2xl p-4 text-center">
+            <p class="font-display text-xl text-gold font-bold">100%</p>
+            <p class="text-white/50 text-xs mt-1">Daging Segar</p>
+          </div>
+          <div class="bg-white/5 border border-white/10 rounded-2xl p-4 text-center">
+            <p class="font-display text-xl text-gold font-bold">No MSG</p>
+            <p class="text-white/50 text-xs mt-1">Tanpa Pengawet</p>
+          </div>
+          <div class="bg-white/5 border border-white/10 rounded-2xl p-4 text-center">
+            <p class="font-display text-xl text-gold font-bold">30 Min</p>
+            <p class="text-white/50 text-xs mt-1">Delivery Cepat</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CONTACT ===== -->
+<section id="contact" class="py-24 bg-[#FFF8F0]">
+  <div class="max-w-xl mx-auto px-6">
+    <div class="text-center mb-12">
+      <span class="inline-block bg-red-100 text-brand text-xs font-bold tracking-widest uppercase px-4 py-1.5 rounded-full mb-3">Hubungi Kami</span>
+      <h2 class="font-display text-4xl sm:text-5xl font-extrabold text-dark">Mau <span class="text-brand">Pesan?</span></h2>
+      <p class="text-gray-500 mt-3 text-sm">Tuliskan pesanan mu dibawah.</p>
+    </div>
+
+    <form id="contactForm" novalidate class="bg-white rounded-3xl shadow-xl border border-amber-100 p-8 space-y-5">
+      <div>
+        <label for="cName" class="block text-sm font-semibold text-dark mb-1.5">Nama Lengkap</label>
+        <input type="text" id="cName" placeholder="Nama kamu"
+          class="form-field w-full px-4 py-3 rounded-xl border border-gray-200 text-sm transition" required />
+        <p class="text-brand text-xs mt-1 hidden" id="nameErr">Nama wajib diisi.</p>
+      </div>
+      <div>
+        <label for="cWa" class="block text-sm font-semibold text-dark mb-1.5">No. WhatsApp</label>
+        <div class="flex">
+          <span class="inline-flex items-center px-3 rounded-l-xl border border-r-0 border-gray-200 bg-gray-50 text-gray-500 text-sm">+62</span>
+          <input type="tel" id="cWa" placeholder="812xxxxxxxx"
+            class="form-field w-full px-4 py-3 rounded-r-xl border border-gray-200 text-sm transition" required />
+        </div>
+        <p class="text-brand text-xs mt-1 hidden" id="waErr">No. WhatsApp wajib diisi.</p>
+      </div>
+      <div>
+        <label for="cAlamat" class="block text-sm font-semibold text-dark mb-1.5">Alamat Pengiriman</label>
+        <textarea id="cAlamat" rows="2" placeholder="Jl. Contoh No. 1, Kelurahan, Kecamatan, Kota..."
+          class="form-field w-full px-4 py-3 rounded-xl border border-gray-200 text-sm transition resize-none" required></textarea>
+        <p class="text-brand text-xs mt-1 hidden" id="alamatErr">Alamat wajib diisi.</p>
+      </div>
+      <div>
+        <label for="cMsg" class="block text-sm font-semibold text-dark mb-1.5">Pesan / Pesanan</label>
+        <textarea id="cMsg" rows="3" placeholder="Contoh: 2x Classic Crazy, 1x Double Smash, tanpa bawang..."
+          class="form-field w-full px-4 py-3 rounded-xl border border-gray-200 text-sm transition resize-none" required></textarea>
+        <p class="text-brand text-xs mt-1 hidden" id="msgErr">Pesan wajib diisi.</p>
+      </div>
+
+      <button type="submit" id="submitBtn"
+        class="w-full bg-brand hover:bg-red-500 text-white font-bold py-3.5 rounded-xl transition-all hover:scale-[1.02] flex items-center justify-center gap-2">
+        <i class="fa-solid fa-paper-plane"></i> Kirim Pesan
+      </button>
+
+      <!-- Status messages -->
+      <p id="formSuccess" class="hidden text-center text-green-600 font-semibold text-sm">
+        <i class="fa-solid fa-circle-check mr-1"></i>Pesan terkirim!
+      </p>
+      <p id="formError" class="hidden text-center text-brand font-semibold text-sm">
+        <i class="fa-solid fa-circle-exclamation mr-1"></i>Gagal mengirim. Coba lagi atau hubungi via WhatsApp.
+      </p>
+    </form>
+
+    <div class="mt-8 text-center">
+      <p class="text-gray-400 text-sm mb-3">Atau langsung chat kami</p>
+      <a href="https://wa.me/6281243599124?text=Halo%20CrazyBurger!"
+         target="_blank" rel="noopener"
+         class="inline-flex items-center gap-2 bg-green-500 hover:bg-green-400 text-white font-bold px-6 py-3 rounded-full transition-all hover:scale-105 shadow-md">
+        <i class="fa-brands fa-whatsapp text-lg"></i> WhatsApp Kami
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="bg-dark border-t border-white/10 py-10">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+      <div class="text-center md:text-left">
+        <div class="flex items-center justify-center md:justify-start gap-2 mb-2">
+          <div class="w-8 h-8 bg-brand rounded-lg flex items-center justify-center">
+            <i class="fa-solid fa-burger text-white text-xs"></i>
+          </div>
+          <span class="font-display text-white font-bold text-lg">Crazy<span class="text-gold">Burger</span></span>
+        </div>
+        <p class="text-white/40 text-xs">Burger Terlezat di Kota Malang — Sejak 2018</p>
+      </div>
+
+      <ul class="flex gap-6 text-sm font-medium text-white/50">
+        <li><a href="#home"    class="hover:text-gold transition-colors">Home</a></li>
+        <li><a href="#menu"    class="hover:text-gold transition-colors">Menu</a></li>
+        <li><a href="#about"   class="hover:text-gold transition-colors">About</a></li>
+        <li><a href="#contact" class="hover:text-gold transition-colors">Contact</a></li>
+      </ul>
+
+      <div class="flex items-center gap-3">
+        <a href="https://instagram.com/hmrwxz" target="_blank" rel="noopener" aria-label="Instagram"
+           class="w-9 h-9 rounded-full bg-white/10 hover:bg-gold hover:text-dark text-white/60 flex items-center justify-center transition-all hover:scale-110">
+          <i class="fa-brands fa-instagram text-sm"></i>
+        </a>
+        <a href="https://www.tiktok.com/@xzu_08" target="_blank" rel="noopener" aria-label="TikTok"
+           class="w-9 h-9 rounded-full bg-white/10 hover:bg-gold hover:text-dark text-white/60 flex items-center justify-center transition-all hover:scale-110">
+          <i class="fa-brands fa-tiktok text-sm"></i>
+        </a>
+        <a href="https://wa.me/6281243599124" target="_blank" rel="noopener" aria-label="WhatsApp"
+           class="w-9 h-9 rounded-full bg-white/10 hover:bg-gold hover:text-dark text-white/60 flex items-center justify-center transition-all hover:scale-110">
+          <i class="fa-brands fa-whatsapp text-sm"></i>
+        </a>
+      </div>
+    </div>
+
+    <div class="border-t border-white/10 mt-8 pt-6 text-center text-white/30 text-xs">
+      &copy; 2018 CrazyBurger. All rights reserved.
+    </div>
+  </div>
+</footer>
+
+<!-- ===== JAVASCRIPT ===== -->
+<script>
+  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxK2Oqukk6vNXzdZoRVsED0xZLrslx2ICH-RLOjboHIZcrKdkOOnsrQWy6CZIIYR4BN/exec';
+
+  // --- Navbar scroll ---
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 40);
+  }, { passive: true });
+
+  // --- Mobile menu ---
+  const menuBtn    = document.getElementById('menuBtn');
+  const mobileMenu = document.getElementById('mobileMenu');
+  const menuIcon   = document.getElementById('menuIcon');
+  menuBtn.addEventListener('click', () => {
+    const open = !mobileMenu.classList.contains('hidden');
+    mobileMenu.classList.toggle('hidden', open);
+    menuIcon.className = open ? 'fa-solid fa-bars' : 'fa-solid fa-xmark';
+  });
+  document.querySelectorAll('.mobile-link').forEach(l => {
+    l.addEventListener('click', () => {
+      mobileMenu.classList.add('hidden');
+      menuIcon.className = 'fa-solid fa-bars';
+    });
+  });
+
+  // --- Status Buka / Tutup otomatis ---
+  function updateStoreStatus() {
+    const now  = new Date();
+    const hour = now.getHours(); // 0-23
+
+    const dot    = document.getElementById('statusDot');
+    const text   = document.getElementById('statusText');
+    const btn    = document.getElementById('heroOrderBtn');
+
+    // Jam 08:00 - 18:59 → BUKA
+    // Jam 19:00 - 19:59 → AKAN TUTUP (1 jam sebelum tutup jam 20)
+    // Jam 20:00 - 07:59 → TUTUP
+
+    if (hour >= 8 && hour < 19) {
+      // BUKA SEKARANG
+      dot.className    = 'w-2 h-2 rounded-full animate-pulse bg-green-400';
+      text.textContent = 'BUKA SEKARANG · DELIVERY 30 MENIT';
+      btn.className    = 'inline-flex items-center gap-2 bg-gold hover:bg-yellow-300 text-dark font-bold px-7 py-4 rounded-2xl transition-all hover:scale-105 shadow-lg shadow-gold/20';
+      btn.innerHTML    = 'Pesan Sekarang';
+      btn.setAttribute('href', '#contact');
+      btn.onclick      = null;
+
+    } else if (hour === 19) {
+      // AKAN TUTUP (jam 19:00 - 19:59)
+      dot.className    = 'w-2 h-2 rounded-full animate-pulse bg-yellow-400';
+      text.textContent = 'AKAN TUTUP · TUTUP JAM 20.00';
+      btn.className    = 'inline-flex items-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-dark font-bold px-7 py-4 rounded-2xl transition-all hover:scale-105 shadow-lg shadow-yellow-400/20';
+      btn.innerHTML    = 'Pesan Sekarang';
+      btn.setAttribute('href', '#contact');
+      btn.onclick      = null;
+
+    } else {
+      // TUTUP (jam 20:00 - 07:59)
+      dot.className    = 'w-2 h-2 rounded-full bg-red-500';
+      text.textContent = 'TUTUP · BUKA JAM 08.00 PAGI';
+      btn.className    = 'inline-flex items-center gap-2 bg-brand text-white font-bold px-7 py-4 rounded-2xl opacity-60 cursor-not-allowed';
+      btn.innerHTML    = '<i class="fa-solid fa-ban mr-1"></i> Sedang Tutup';
+      btn.removeAttribute('href');
+      btn.onclick      = e => e.preventDefault();
+    }
+  }
+
+  updateStoreStatus();
+  setInterval(updateStoreStatus, 60 * 1000); // cek tiap menit
+
+  document.getElementById('contactForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const nama   = document.getElementById('cName');
+    const wa     = document.getElementById('cWa');
+    const alamat = document.getElementById('cAlamat');
+    const pesan  = document.getElementById('cMsg');
+    const btn    = document.getElementById('submitBtn');
+
+    // Reset
+    ['nameErr','waErr','alamatErr','msgErr'].forEach(id => document.getElementById(id).classList.add('hidden'));
+    [nama, wa, alamat, pesan].forEach(el => el.classList.remove('border-brand'));
+    document.getElementById('formSuccess').classList.add('hidden');
+    document.getElementById('formError').classList.add('hidden');
+
+    // Validate
+    let valid = true;
+    if (!nama.value.trim()) {
+      document.getElementById('nameErr').classList.remove('hidden');
+      nama.classList.add('border-brand'); valid = false;
+    }
+    if (!wa.value.trim() || !/^[0-9]{8,13}$/.test(wa.value.trim())) {
+      document.getElementById('waErr').classList.remove('hidden');
+      wa.classList.add('border-brand'); valid = false;
+    }
+    if (!alamat.value.trim()) {
+      document.getElementById('alamatErr').classList.remove('hidden');
+      alamat.classList.add('border-brand'); valid = false;
+    }
+    if (!pesan.value.trim()) {
+      document.getElementById('msgErr').classList.remove('hidden');
+      pesan.classList.add('border-brand'); valid = false;
+    }
+    if (!valid) return;
+
+    // Loading state
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch spin mr-2"></i>Mengirim...';
+
+    try {
+      await fetch(SHEET_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nama:   nama.value.trim(),
+          wa:     '+62' + wa.value.trim(),
+          alamat: alamat.value.trim(),
+          pesan:  pesan.value.trim()
+        })
+      });
+      this.reset();
+      document.getElementById('formSuccess').classList.remove('hidden');
+    } catch (err) {
+      document.getElementById('formError').classList.remove('hidden');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Kirim Pesan';
+    }
+  });
+</script>
+</body>
+</html>
